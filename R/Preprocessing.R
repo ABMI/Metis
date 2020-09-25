@@ -31,7 +31,8 @@ andromedaToSparseM <- function(andromedaCovariate, fileName = NULL, batchSize = 
 }
 
 #' @export
-mapCov <- function(covariateData, mapping = NULL){
+mapCov <- function(covariateData, mapping = NULL, deletedCovariateIds = c()){
+  ParallelLogger::logTrace('mapping Covariate ID to new covariate IDs')
   newCovariateData <- Andromeda::andromeda(covariateRef = covariateData$covariateRef,
                                            analysisRef = covariateData$analysisRef)
   
@@ -42,10 +43,11 @@ mapCov <- function(covariateData, mapping = NULL){
   # attr(newCovariateData, "metaData")$deletedRedundantCovariateIds <- attr(covariateData, "metaData")$deletedRedundantCovariateIds
   
   # restrict to population for speed
-  ParallelLogger::logTrace('restricting to population for speed and mapping')
   if(is.null(mapping)){
+    ParallelLogger::logTrace('generate new mapping')
     oldCovariateId = as.data.frame(covariateData$covariateRef %>% 
                                      dplyr::select(.data$covariateId) %>%
+                                     dplyr::filter(!(.data$covariateId %in% !!deletedCovariateIds)) %>%
                                      dplyr::arrange(covariateId)
     ) 
     newCovariateId = 1:nrow(oldCovariateId)
@@ -53,17 +55,18 @@ mapCov <- function(covariateData, mapping = NULL){
     
     mapping <- data.frame(oldCovariateId = oldCovariateId,
                           newCovariateId = newCovariateId)
+    colnames(mapping) <- c('oldCovariateId','newCovariateId')
   }
   if(sum(colnames(mapping)%in%c('oldCovariateId','newCovariateId'))!=2){
     colnames(mapping) <- c('oldCovariateId','newCovariateId')
   }
   
-  rowIds <- covariateData$covariates %>% dplyr::pull(rowId) %>% unique()
+  #rowIds <- covariateData$covariates %>% dplyr::pull(rowId) %>% unique()
   
   covariateData$mapping <- mapping
   # assign new ids :
   newCovariateData$covariates <- covariateData$covariates %>%
-    dplyr::filter(.data$rowId %in% !!rowIds) %>%
+    #dplyr::filter(.data$rowId %in% !!rowIds) %>%
     dplyr::rename(oldCovariateId = covariateId) %>% 
     dplyr::inner_join(covariateData$mapping) %>% 
     dplyr::select(-oldCovariateId)  %>%
@@ -72,4 +75,20 @@ mapCov <- function(covariateData, mapping = NULL){
   newCovariateData$mapping <- mapping
   
   return(newCovariateData)
+}
+
+#' @export
+reduceCovariateData <- function(covariateData, rowIdLimit){
+  covariates <- covariateData$covariates %>%
+    filter(.data$rowId <= rowIdLimit)
+  
+  filteredCovariateData <- Andromeda::andromeda(covariates = covariates,
+                                                covariateRef = covariateData$covariateRef,
+                                                analysisRef = covariateData$analysisRef)
+  metaData <- attr(covariateData, "metaData")
+  metaData$rowIdLimit <- rowIdLimit
+  attr(filteredCovariateData, "metaData") <- metaData
+  class(filteredCovariateData) <- "CovariateData"
+  
+  return(filteredCovariateData)
 }

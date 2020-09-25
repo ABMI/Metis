@@ -1,7 +1,9 @@
 #https://slowkow.com/notes/sparse-matrix/
+#https://stackoverflow.com/questions/24236426/how-to-get-a-big-sparse-matrix-in-r-231-1
 
 #' @param x A sparse matrix from the Matrix package.
 #' @param file A filename that ends in ".gz".
+#' @export
 writeMMgz <- function(batch, fileName) {
   data.table::fwrite(
     x = data.frame(i = as.data.frame(batch %>% select(rowId))$rowId,
@@ -15,7 +17,13 @@ writeMMgz <- function(batch, fileName) {
   )
 }
 
+#' @export
 startWritingMMgz <- function(fileName, maxX, maxY, rowNum, mType = "real", removeIfFileExist = TRUE){
+  
+  if(rowNum >= (2^31)) {
+    stop("Current Matrix package cannot support big sparse matrix with more than 2^31-1 non-sparse members")
+    }
+  
   if(removeIfFileExist){
     if (file.exists(fileName)) 
       #Delete file if it exists
@@ -31,6 +39,7 @@ startWritingMMgz <- function(fileName, maxX, maxY, rowNum, mType = "real", remov
   )
 }
 
+#' @export
 readBigMM<-function(file){
   if (is.character(file)) 
     file <- if (file == "") 
@@ -63,7 +72,8 @@ readBigMM<-function(file){
          domain = NA)
   nr <- scan1(integer(), comment.char = "%")
   nc <- scan1(integer())
-  nz <- as.integer(scan1(numeric()))
+  # nz <- as.integer(scan1(numeric()))
+  nz <- scan1(numeric())
   checkIJ <- function(els) {
     if (any(els$i < 1 | els$i > nr)) 
       stop("readMM(): row\t values 'i' are not in 1:nr", 
@@ -120,3 +130,4 @@ readBigMM<-function(file){
                      "readMM", repr), domain = NA)
 }
 
+# reduceCovariates <- function()

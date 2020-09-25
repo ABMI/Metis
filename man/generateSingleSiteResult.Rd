@@ -4,13 +4,24 @@
 \alias{generateSingleSiteResult}
 \title{Generation cmObject and fitted PS model}
 \usage{
-generateSingleSiteResult(connectionDetails, oracleTempSchema = NULL,
-  outputFolder, databaseId = "Unknown", databaseName = "Unknown",
-  databaseDescription = "Unknown", cdmDatabaseSchema,
-  outcomeDatabaseSchema = cdmDatabaseSchema, outcomeTable = "outcome",
-  nestingDatabaseSchema = cdmDatabaseSchema, nestingTable = "nesting",
-  createCohorts = TRUE, createCmObject = TRUE, fitPsModel = TRUE,
-  uploadResult = FALSE, maxCores = 4)
+generateSingleSiteResult(
+  connectionDetails,
+  oracleTempSchema = NULL,
+  outputFolder,
+  databaseId = "Unknown",
+  databaseName = "Unknown",
+  databaseDescription = "Unknown",
+  cdmDatabaseSchema,
+  outcomeDatabaseSchema = cdmDatabaseSchema,
+  outcomeTable = "outcome",
+  nestingDatabaseSchema = cdmDatabaseSchema,
+  nestingTable = "nesting",
+  createCohorts = TRUE,
+  createCmObject = TRUE,
+  fitPsModel = TRUE,
+  uploadResult = FALSE,
+  maxCores = 4
+)
 }
 \description{
 Generation cmObject and fitted PS model

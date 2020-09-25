@@ -7,4 +7,4 @@ Author: Seng Chan You <applegna@gmail.com>
 Maintainer: Seng Chan You <applegna@gmail.com>
 Description: Methods to Enable Transferring Information across OHDSI
 License: Apache 2.0
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0
